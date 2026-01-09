@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kişisel Galeri</title>
+    <style>
+        /* CSS: GÖRSEL TASARIM KATMANI */
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #f0f0f0;
+            --accent-color: #3498db;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Container Yapıları */
+        .container {
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+            padding: 20px;
+            background: #252525;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Görsel Stilleri */
+        #gallery-view img {
+            width: 100%;
+            height: auto;
+            max-height: 60vh;
+            object-fit: contain; /* Görsel oranını bozmadan sığdır */
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+        }
+
+        /* Video Bölümü (Başlangıçta Gizli) */
+        #video-view {
+            display: none; /* DOM'da var ama görünmez */
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio için trick */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Kontrol Butonları */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.9; }
+        button:disabled { background-color: #555; cursor: not-allowed; }
+
+    </style>
+</head>
+<body>
+
+    <div id="gallery-view" class="container">
+        <h3 id="photo-counter">Yükleniyor...</h3>
+        
+        <img id="main-image" src="" alt="Galeri">
+
+        <div class="controls">
+            <button id="btn-prev" onclick="handleNavigation(-1)">← Geri</button>
+            <button id="btn-next" onclick="handleNavigation(1)">İleri →</button>
+        </div>
+    </div>
+
+    <div id="video-view" class="container">
+        <h2>Son</h2>
+        <p>Galeriyi tamamladınız. İşte video:</p>
+        
+        <div class="video-wrapper">
+            <iframe id="youtube-frame" allowfullscreen></iframe>
+        </div>
+        
+        <br>
+        <button onclick="resetGallery()">Başa Dön</button>
+    </div>
+
+    <script>
+        /* JAVASCRIPT: MANTIK KATMANI */
+        
+        // --- KONFİGÜRASYON ALANI ---
+        // 1. Fotoğraflarının listesi (Dosya yolları veya URL)
+        const photoList = [
+            'assets/foto1.jpg', 
+            'assets/foto2.jpg',
+            'assets/foto3.jpg' 
+            // Burayı kendi dosya isimlerinle güncellemelisin.
+            // Eğer internetten resim kullanacaksan direkt 'https://...' yazabilirsin.
+        ];
+
+        // 2. Gömülecek YouTube Videosunun ID'si
+        // Örn: https://www.youtube.com/watch?v=dQw4w9WgXcQ ise ID: dQw4w9WgXcQ
+        const youtubeVideoID = "M7lc1UVf-VE"; 
+        // ---------------------------
+
+        // State (Durum) Değişkeni
+        let currentIndex = 0;
+
+        // HTML Elementlerini Değişkenlere Ata (Cache DOM)
+        const elGallery = document.getElementById('gallery-view');
+        const elVideo = document.getElementById('video-view');
+        const elImg = document.getElementById('main-image');
+        const elCounter = document.getElementById('photo-counter');
+        const elFrame = document.getElementById('youtube-frame');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+
+        // Başlatıcı
+        function init() {
+            renderGallery();
+        }
+
+        // Navigasyon Mantığı
+        function handleNavigation(direction) {
+            const nextIndex = currentIndex + direction;
+
+            // Eğer son fotoğraftayken ileri basılırsa -> Videoya geç
+            if (nextIndex >= photoList.length) {
+                switchToVideo();
+                return;
+            }
+
+            // Geriye gitme sınırı
+            if (nextIndex < 0) return;
+
+            currentIndex = nextIndex;
+            renderGallery();
+        }
+
+        // Galeriyi Ekrana Çizme (Render)
+        function renderGallery() {
+            elImg.src = photoList[currentIndex];
+            elCounter.innerText = `Görsel ${currentIndex + 1} / ${photoList.length}`;
+
+            // Buton durumlarını güncelle
+            btnPrev.disabled = (currentIndex === 0);
+            btnNext.innerText = (currentIndex === photoList.length - 1) ? "Videoya Geç" : "İleri →";
+        }
+
+        // Videoya Geçiş Mantığı
+        function switchToVideo() {
+            // State Machine gibi düşün: State Gallery -> State Video
+            elGallery.style.display = 'none';
+            elVideo.style.display = 'block';
+
+            // YouTube embed linkini oluştur
+            // rel=0: Video bitince alakasız öneriler çıkmasın
+            elFrame.src = `https://www.youtube.com/embed/${youtubeVideoID}?rel=0&autoplay=1`;
+        }
+
+        // Başa Dönme Mantığı
+        function resetGallery() {
+            currentIndex = 0;
+            elFrame.src = ""; // Videoyu durdurmak için src'yi boşalt
+            elVideo.style.display = 'none';
+            elGallery.style.display = 'block';
+            renderGallery();
+        }
+
+        // Sayfa yüklendiğinde başlat
+        window.onload = init;
+
+    </script>
+</body>
+</html>
