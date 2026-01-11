@@ -3,204 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kişisel Galeri</title>
+    <title>Sinematik Karikatür Okuyucu</title>
     <style>
-        /* CSS: GÖRSEL TASARIM KATMANI */
+        /* --- CSS: TASARIM KATMANI --- */
         :root {
-            --bg-color: #1a1a1a;
+            --bg-color: #050505;
             --text-color: #f0f0f0;
-            --accent-color: #3498db;
+            --accent-color: #e74c3c;
         }
 
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            min-height: 100vh; overflow-x: hidden;
         }
 
-        /* Container Yapıları */
-        .container {
-            width: 90%;
-            max-width: 800px;
-            text-align: center;
-            padding: 20px;
-            background: #252525;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .view-container {
+            display: none; width: 100%; max-width: 900px;
+            text-align: center; padding: 20px; box-sizing: border-box;
+            animation: fadeIn 1s ease;
         }
+        .active { display: block; }
 
-        /* Görsel Stilleri */
-        #gallery-view img {
-            width: 100%;
-            height: auto;
-            max-height: 60vh;
-            object-fit: contain; /* Görsel oranını bozmadan sığdır */
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #444;
+        /* Giriş Ekranı */
+        #start-view { margin-top: -50px; }
+        .btn-start {
+            padding: 20px 50px; font-size: 1.5rem; background: var(--accent-color);
+            color: white; border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.4); transition: transform 0.2s;
         }
+        .btn-start:hover { transform: scale(1.05); }
 
-        /* Video Bölümü (Başlangıçta Gizli) */
-        #video-view {
-            display: none; /* DOM'da var ama görünmez */
+        /* Okuyucu */
+        #comic-image {
+            width: auto; max-width: 100%; max-height: 80vh;
+            border-radius: 4px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            transition: opacity 0.3s;
         }
+        .loading { opacity: 0.5; }
+        
+        .controls { margin-top: 20px; display: flex; justify-content: center; gap: 20px; }
+        .btn-nav {
+            padding: 12px 25px; background: #333; color: white;
+            border: 1px solid #444; border-radius: 20px; cursor: pointer;
+        }
+        .btn-nav:hover { background: #444; }
+        .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-finish { background-color: #2ecc71; color: #000; font-weight: bold; border-color: #27ae60;}
 
+        /* Video ve Müzik */
         .video-wrapper {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio için trick */
-            height: 0;
-            overflow: hidden;
-            border-radius: 8px;
+            position: relative; padding-bottom: 56.25%; height: 0;
+            overflow: hidden; background: #000; margin-top: 20px;
         }
-
         .video-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
+        /* Müziği gizle ama DOM'da tut */
+        #music-player-container {
+            position: absolute; width: 1px; height: 1px;
+            opacity: 0; pointer-events: none; top: -9999px;
         }
 
-        /* Kontrol Butonları */
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-
-        button {
-            padding: 12px 24px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: opacity 0.2s;
-        }
-
-        button:hover { opacity: 0.9; }
-        button:disabled { background-color: #555; cursor: not-allowed; }
-
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="gallery-view" class="container">
-        <h3 id="photo-counter">Yükleniyor...</h3>
-        
-        <img id="main-image" src="" alt="Galeri">
+    <div id="start-view" class="view-container active">
+        <h1>Hikaye Başlıyor</h1>
+        <p>Seslerin açık olduğundan emin olun.</p>
+        <button class="btn-start" onclick="startExperience()">BAŞLA ▶</button>
+    </div>
 
+    <div id="reader-view" class="view-container">
+        <div id="status-text" style="color:#666; margin-bottom:10px;">KAPAK</div>
+        <img id="comic-image" src="" alt="Sayfa">
         <div class="controls">
-            <button id="btn-prev" onclick="handleNavigation(-1)">← Geri</button>
-            <button id="btn-next" onclick="handleNavigation(1)">İleri →</button>
+            <button id="btn-prev" class="btn-nav" onclick="changePage(-1)">← Geri</button>
+            <button id="btn-next" class="btn-nav" onclick="changePage(1)">İleri →</button>
         </div>
     </div>
 
-    <div id="video-view" class="container">
+    <div id="video-view" class="view-container">
         <h2>Son</h2>
-        <p>Galeriyi tamamladınız. İşte video:</p>
-        
         <div class="video-wrapper">
-            <iframe id="youtube-frame" allowfullscreen></iframe>
+            <iframe id="final-video-frame" allowfullscreen></iframe>
         </div>
-        
         <br>
-        <button onclick="resetGallery()">Başa Dön</button>
+        <button class="btn-nav" onclick="restart()">Başa Dön</button>
+    </div>
+
+    <div id="music-player-container">
+        <iframe id="bg-music-frame" allow="autoplay"></iframe>
     </div>
 
     <script>
-        /* JAVASCRIPT: MANTIK KATMANI */
-        
-        // --- KONFİGÜRASYON ALANI ---
-        // 1. Fotoğraflarının listesi (Dosya yolları veya URL)
-        const photoList = [
-            'assets/foto1.jpg', 
-            'assets/foto2.jpg',
-            'assets/foto3.jpg' 
-            // Burayı kendi dosya isimlerinle güncellemelisin.
-            // Eğer internetten resim kullanacaksan direkt 'https://...' yazabilirsin.
-        ];
+        /* --- MÜHENDİSLİK AYARLARI (CONFIG) --- */
+        const config = {
+            totalContentPages: 25,     
+            folder: "assets/karikatur/", 
+            ext: ".png",
+            finalVideoID: "M7lc1UVf-VE",
 
-        // 2. Gömülecek YouTube Videosunun ID'si
-        // Örn: https://www.youtube.com/watch?v=dQw4w9WgXcQ ise ID: dQw4w9WgXcQ
-        const youtubeVideoID = "M7lc1UVf-VE"; 
-        // ---------------------------
+            // --- MÜZİK SEGMENTLERİ (LUT - Look Up Table) ---
+            // 'startPage': Hangi sayfada bu müzik çalmaya başlasın?
+            // 'videoID': YouTube Video ID'si
+            // Sistem her zaman o anki sayfadan küçük veya eşit olan en büyük 'startPage' değerini baz alır.
+            musicSegments: [
+                { startPage: 0,  videoID: "5qap5aO4i9A" }, // Kapak ve Sayfa 7'ye kadar (Varsayılan Lofi)
+                { startPage: 8,  videoID: "jfKfPfyJRdk" }, // Sayfa 8'de başlar (Lofi Girl Synthwave)
+                { startPage: 15, videoID: "4xDzrJKXOOY" }, // Sayfa 15'te başlar (Dark Ambient)
+                { startPage: 24, videoID: "5yx6BWlEVcY" }  // Sayfa 24 ve 25 (Action/Final Music)
+            ]
+        };
+        /* -------------------------------------- */
 
-        // State (Durum) Değişkeni
+        // Durum Değişkenleri
+        let pages = [];
         let currentIndex = 0;
+        let currentMusicID = ""; // Şu an çalan müziği takip etmek için
 
-        // HTML Elementlerini Değişkenlere Ata (Cache DOM)
-        const elGallery = document.getElementById('gallery-view');
-        const elVideo = document.getElementById('video-view');
-        const elImg = document.getElementById('main-image');
-        const elCounter = document.getElementById('photo-counter');
-        const elFrame = document.getElementById('youtube-frame');
-        const btnPrev = document.getElementById('btn-prev');
+        // Cache DOM
+        const views = {
+            start: document.getElementById('start-view'),
+            reader: document.getElementById('reader-view'),
+            video: document.getElementById('video-view')
+        };
+        const elImg = document.getElementById('comic-image');
+        const elStatus = document.getElementById('status-text');
+        const elMusicFrame = document.getElementById('bg-music-frame');
+        const elFinalFrame = document.getElementById('final-video-frame');
         const btnNext = document.getElementById('btn-next');
+        const btnPrev = document.getElementById('btn-prev');
 
-        // Başlatıcı
+        // Init
         function init() {
-            renderGallery();
+            // Liste Oluşturma
+            pages.push(`${config.folder}kapak${config.ext}`);
+            for (let i = 1; i <= config.totalContentPages; i++) {
+                let num = i < 10 ? "0" + i : i;
+                pages.push(`${config.folder}sayfa${num}${config.ext}`);
+            }
         }
 
-        // Navigasyon Mantığı
-        function handleNavigation(direction) {
-            const nextIndex = currentIndex + direction;
+        // Başlatma
+        function startExperience() {
+            switchView('reader');
+            renderPage(); // Müzik kontrolü renderPage içinde yapılıyor
+        }
 
-            // Eğer son fotoğraftayken ileri basılırsa -> Videoya geç
-            if (nextIndex >= photoList.length) {
-                switchToVideo();
+        // Sayfa Değişimi
+        function changePage(dir) {
+            const nextIndex = currentIndex + dir;
+
+            if (nextIndex >= pages.length) {
+                finishStory();
                 return;
             }
-
-            // Geriye gitme sınırı
             if (nextIndex < 0) return;
 
             currentIndex = nextIndex;
-            renderGallery();
+            renderPage();
         }
 
-        // Galeriyi Ekrana Çizme (Render)
-        function renderGallery() {
-            elImg.src = photoList[currentIndex];
-            elCounter.innerText = `Görsel ${currentIndex + 1} / ${photoList.length}`;
+        // Render (Görsel ve Müzik Kontrolü)
+        function renderPage() {
+            // 1. Görseli Yükle
+            elImg.classList.add('loading');
+            elImg.src = pages[currentIndex];
+            elImg.onload = () => elImg.classList.remove('loading');
 
-            // Buton durumlarını güncelle
+            // 2. Metni Güncelle
+            elStatus.innerText = currentIndex === 0 ? "KAPAK" : `SAYFA ${currentIndex} / ${config.totalContentPages}`;
+
+            // 3. Butonları Güncelle
             btnPrev.disabled = (currentIndex === 0);
-            btnNext.innerText = (currentIndex === photoList.length - 1) ? "Videoya Geç" : "İleri →";
+            if (currentIndex === pages.length - 1) {
+                btnNext.innerText = "BİTİR";
+                btnNext.classList.add('btn-finish');
+            } else {
+                btnNext.innerText = "İleri →";
+                btnNext.classList.remove('btn-finish');
+            }
+
+            // 4. MÜZİK KONTROLÜ (Critical Logic)
+            checkAndPlayMusic();
+
+            // 5. Yukarı Kaydır
+            window.scrollTo(0,0);
         }
 
-        // Videoya Geçiş Mantığı
-        function switchToVideo() {
-            // State Machine gibi düşün: State Gallery -> State Video
-            elGallery.style.display = 'none';
-            elVideo.style.display = 'block';
+        // Müzik Mantığı
+        function checkAndPlayMusic() {
+            // Algoritma: Mevcut sayfa numarasına (currentIndex) uygun segmenti bul.
+            // Segmentleri tersten veya düzden tarayarak en uygun aralığı bulabiliriz.
+            // Buradaki yöntem: musicSegments içinde 'startPage' değeri current index'ten küçük veya eşit olan EN SON segmenti bul.
+            
+            let selectedID = "";
+            
+            // Segmentleri startPage'e göre küçükten büyüğe sıralı varsayıyoruz.
+            for (let i = 0; i < config.musicSegments.length; i++) {
+                if (currentIndex >= config.musicSegments[i].startPage) {
+                    selectedID = config.musicSegments[i].videoID;
+                }
+            }
 
-            // YouTube embed linkini oluştur
-            // rel=0: Video bitince alakasız öneriler çıkmasın
-            elFrame.src = `https://www.youtube.com/embed/${youtubeVideoID}?rel=0&autoplay=1`;
+            // Eğer şu an çalması gereken müzik, zaten çalan müzikten farklıysa değiştir.
+            if (selectedID !== currentMusicID) {
+                console.log(`Müzik Değişiyor: ${currentMusicID} -> ${selectedID}`);
+                currentMusicID = selectedID;
+                
+                // YouTube Embed URL (Autoplay, Loop)
+                elMusicFrame.src = `https://www.youtube.com/embed/${selectedID}?autoplay=1&loop=1&playlist=${selectedID}&controls=0&showinfo=0`;
+            }
         }
 
-        // Başa Dönme Mantığı
-        function resetGallery() {
+        function finishStory() {
+            elMusicFrame.src = ""; // Müziği sustur
+            elFinalFrame.src = `https://www.youtube.com/embed/${config.finalVideoID}?autoplay=1&rel=0`;
+            switchView('video');
+        }
+
+        function restart() {
             currentIndex = 0;
-            elFrame.src = ""; // Videoyu durdurmak için src'yi boşalt
-            elVideo.style.display = 'none';
-            elGallery.style.display = 'block';
-            renderGallery();
+            currentMusicID = ""; // Reset
+            elFinalFrame.src = "";
+            elMusicFrame.src = "";
+            switchView('start');
         }
 
-        // Sayfa yüklendiğinde başlat
-        window.onload = init;
+        function switchView(name) {
+            Object.values(views).forEach(el => el.classList.remove('active'));
+            views[name].classList.add('active');
+        }
+
+        init();
 
     </script>
 </body>
