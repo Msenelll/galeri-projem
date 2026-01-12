@@ -9,7 +9,6 @@
         rel="stylesheet">
 
     <style>
-        /* --- CSS: TASARIM KATMANI --- */
         :root {
             --bg-color: #050505;
             --text-color: #f0f0f0;
@@ -20,7 +19,6 @@
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
-            /* Arka plan görseli */
             background-image: url('image_1.png');
             background-size: cover;
             background-position: center;
@@ -50,7 +48,6 @@
             display: block;
         }
 
-        /* Giriş ve Bitiş Ekranı Başlıkları */
         h1 {
             font-family: 'Cinzel', serif;
             font-size: 3rem;
@@ -58,7 +55,6 @@
             margin-bottom: 10px;
         }
 
-        /* Giriş Ekranı */
         #start-view {
             margin-top: -50px;
         }
@@ -80,7 +76,6 @@
             transform: scale(1.05);
         }
 
-        /* Müzik Kapatma Butonu */
         #mute-btn {
             position: absolute;
             top: 20px;
@@ -94,7 +89,6 @@
             text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
-        /* Okuyucu */
         #comic-image {
             width: auto;
             max-width: 100%;
@@ -108,7 +102,6 @@
             opacity: 0.5;
         }
 
-        /* STANDART KONTROLLER */
         .controls {
             margin-top: 20px;
             display: flex;
@@ -142,16 +135,13 @@
             border-color: #27ae60;
         }
 
-        /* --- ÖZEL SEÇİM ALANI (SAYFA 23 & 24) --- */
         #choice-container {
             display: none;
-            /* Varsayılan gizli */
             margin-top: 20px;
             height: 180px;
             position: relative;
         }
 
-        /* Dinamik Başlık Stili */
         #choice-title {
             font-family: 'Cinzel', serif;
             font-size: 2.2rem;
@@ -180,7 +170,6 @@
             }
         }
 
-        /* Zarif EVET Butonu */
         .btn-choice-yes {
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             border: 2px solid #a8ffc1;
@@ -203,7 +192,6 @@
             transform: scale(1.1);
         }
 
-        /* Hırçın HAYIR Butonu */
         .btn-choice-no {
             background-color: #c0392b;
             color: white;
@@ -220,7 +208,6 @@
 
         .teleported {
             transform: translateY(100px);
-            /* Kaçış mesafesi */
             background-color: #e74c3c;
         }
 
@@ -242,7 +229,7 @@
 
     <div id="start-view" class="view-container active">
         <h1>Hikaye Başlıyor</h1>
-        <p>Sesler yükleniyor...</p>
+        <p>Sinem Kaya -> Lütfen kulaklık takınız ve ekranı yatay forma çeviriniz...</p>
         <button class="btn-start" onclick="startExperience()">BAŞLA ▶</button>
     </div>
 
@@ -258,7 +245,6 @@
 
         <div id="choice-container">
             <h3 id="choice-title">...</h3>
-
             <button class="btn-choice-yes" onclick="handleYesClick()">EVET</button>
             <button id="btn-no" class="btn-choice-no" onclick="handleNoClick()">HAYIR</button>
         </div>
@@ -271,18 +257,29 @@
     </div>
 
     <script>
-        /* --- CONFIGURATION --- */
+        /* --- MÜHENDİSLİK KONFİGÜRASYONU --- */
         const config = {
-            totalContentPages: 26, // GÜNCELLENDİ: 26 Sayfa
+            totalContentPages: 27,
             folder: "assets/karikatur/",
             ext: ".jpg",
 
-            musicSegments: [
-                { startPage: 0, file: "assets/muzik/giris.mp3" },
-                { startPage: 8, file: "assets/muzik/gerilim.mp3" },
-                { startPage: 15, file: "assets/muzik/karanlik.mp3" },
-                { startPage: 24, file: "assets/muzik/aksiyon.mp3" }
-            ]
+            musicFolder: "assets/muzik/",
+
+            // --- MÜZİK HARİTASI (ÖNEMLİ KISIM) ---
+            // Format:  Sayfa Numarası : "Dosya Adı"
+            // Sadece müziğin DEĞİŞMESİNİ istediğin sayfaları buraya yaz.
+            // Diğer sayfalarda mevcut müzik çalmaya devam eder.
+            musicMap: {
+                0: "1.mp3",  // Kapak Müziği
+                3: "3.mp3", // 15. Sayfada devreye girer
+                10: "10.mp3",    // 10. Sayfada devreye girer
+                16: "16.mp3",    // 16. Sayfada devreye girer
+                18: "18.mp3",    // 18. Sayfada devreye girer
+                24: "24.mp3",    // 24. Sayfada (Hazır mısın?) devreye girer
+                25: "25.mp3",    // 25. Sayfada (Hazır mısın?) devreye girer
+                26: "26.mp3",    // 26. Sayfada (Hazır mısın?) devreye girer
+                // İstersen: 25: "romantik.mp3" de ekleyebilirsin
+            }
         };
 
         // Global Değişkenler
@@ -337,36 +334,25 @@
             renderPage();
         }
 
-        /* --- ÖZEL BUTON İŞLEVLERİ --- */
-        function handleYesClick() {
-            changePage(1);
-        }
-
-        function handleNoClick() {
-            btnNo.classList.toggle('teleported');
-        }
+        function handleYesClick() { changePage(1); }
+        function handleNoClick() { btnNo.classList.toggle('teleported'); }
 
         // --- RENDER ENGINE ---
         function renderPage() {
-            // Görsel
             elImg.classList.add('loading');
             elImg.src = pages[currentIndex];
             elImg.onload = () => elImg.classList.remove('loading');
 
-            // Metin
             elStatus.innerText = currentIndex === 0 ? "KAPAK" : `SAYFA ${currentIndex}`;
 
-            // --- KRİTİK ALAN: SAYFA 23 ve 24 MANTIĞI ---
-            if (currentIndex === 23 || currentIndex === 24) {
+            // Özel Sayfa Mantığı (24 ve 25)
+            if (currentIndex === 24 || currentIndex === 25) {
                 elStandardControls.style.display = 'none';
                 elChoiceContainer.style.display = 'block';
                 btnNo.classList.remove('teleported');
 
-                if (currentIndex === 23) {
-                    elChoiceTitle.innerText = "HAZIR MISIN?";
-                } else if (currentIndex === 24) {
-                    elChoiceTitle.innerText = "BENİMLE EVLENİR MİSİN?";
-                }
+                if (currentIndex === 24) elChoiceTitle.innerText = "HAZIR MISIN?";
+                else if (currentIndex === 25) elChoiceTitle.innerText = "BENİMLE EVLENİR MİSİN?";
 
             } else {
                 elStandardControls.style.display = 'flex';
@@ -386,22 +372,30 @@
             window.scrollTo(0, 0);
         }
 
+        // --- AKILLI MÜZİK MOTORU ---
         function updateMusic() {
-            let selectedFile = "";
-            for (let i = 0; i < config.musicSegments.length; i++) {
-                if (currentIndex >= config.musicSegments[i].startPage) {
-                    selectedFile = config.musicSegments[i].file;
-                }
-            }
+            // 1. Şu anki sayfa için haritada bir atama var mı kontrol et
+            const assignedTrack = config.musicMap[currentIndex];
 
-            if (selectedFile !== currentAudioFile) {
-                currentAudioFile = selectedFile;
-                bgAudio.src = selectedFile;
-                const playPromise = bgAudio.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => { console.log("Audio bekliyor:", error); });
+            // 2. Eğer varsa ve şu an çalan müzikten farklıysa değiştir
+            if (assignedTrack) {
+                const fullPath = config.musicFolder + assignedTrack;
+
+                if (currentAudioFile !== fullPath) {
+                    console.log(`Müzik Değişimi: ${assignedTrack}`);
+                    currentAudioFile = fullPath;
+                    bgAudio.src = fullPath;
+
+                    const playPromise = bgAudio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                            console.log("Audio hatası:", error);
+                        });
+                    }
                 }
             }
+            // 3. Eğer yoksa ("else" durumu), hiçbir şey yapma.
+            // Bu sayede önceki müzik çalmaya devam eder.
         }
 
         function toggleMute() {
