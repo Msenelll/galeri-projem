@@ -1,149 +1,318 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sinematik Karikatür Okuyucu</title>
+    <title>Özel Bir Soru</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Segoe+UI:wght@400;600&display=swap"
+        rel="stylesheet">
+
     <style>
         /* --- CSS: TASARIM KATMANI --- */
         :root {
             --bg-color: #050505;
             --text-color: #f0f0f0;
-            --accent-color: #e74c3c;
+            --accent-color: #3498db;
         }
 
         body {
-            margin: 0; padding: 0;
+            margin: 0;
+            padding: 0;
             background-color: var(--bg-color);
+            /* Arka plan görseli */
+            background-image: url('image_1.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             color: var(--text-color);
             font-family: 'Segoe UI', sans-serif;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            min-height: 100vh; overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.5s;
         }
 
         .view-container {
-            display: none; width: 100%; max-width: 900px;
-            text-align: center; padding: 20px; box-sizing: border-box;
+            display: none;
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
             animation: fadeIn 1s ease;
         }
-        .active { display: block; }
+
+        .active {
+            display: block;
+        }
+
+        /* Giriş ve Bitiş Ekranı Başlıkları */
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+        }
 
         /* Giriş Ekranı */
-        #start-view { margin-top: -50px; }
-        .btn-start {
-            padding: 20px 50px; font-size: 1.5rem; background: var(--accent-color);
-            color: white; border: none; border-radius: 50px; cursor: pointer;
-            box-shadow: 0 0 20px rgba(231, 76, 60, 0.4); transition: transform 0.2s;
+        #start-view {
+            margin-top: -50px;
         }
-        .btn-start:hover { transform: scale(1.05); }
+
+        .btn-start {
+            padding: 20px 50px;
+            font-size: 1.5rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.4);
+            transition: transform 0.2s;
+            font-family: 'Cinzel', serif;
+        }
+
+        .btn-start:hover {
+            transform: scale(1.05);
+        }
+
+        /* Müzik Kapatma Butonu */
+        #mute-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            color: #e74c3c;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 100;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
 
         /* Okuyucu */
         #comic-image {
-            width: auto; max-width: 100%; max-height: 80vh;
-            border-radius: 4px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            width: auto;
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 4px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
             transition: opacity 0.3s;
         }
-        .loading { opacity: 0.5; }
-        
-        .controls { margin-top: 20px; display: flex; justify-content: center; gap: 20px; }
+
+        .loading {
+            opacity: 0.5;
+        }
+
+        /* STANDART KONTROLLER */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
         .btn-nav {
-            padding: 12px 25px; background: #333; color: white;
-            border: 1px solid #444; border-radius: 20px; cursor: pointer;
-        }
-        .btn-nav:hover { background: #444; }
-        .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
-        .btn-finish { background-color: #2ecc71; color: #000; font-weight: bold; border-color: #27ae60;}
-
-        /* Video ve Müzik */
-        .video-wrapper {
-            position: relative; padding-bottom: 56.25%; height: 0;
-            overflow: hidden; background: #000; margin-top: 20px;
-        }
-        .video-wrapper iframe {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
-        }
-        /* Müziği gizle ama DOM'da tut */
-        #music-player-container {
-            position: absolute; width: 1px; height: 1px;
-            opacity: 0; pointer-events: none; top: -9999px;
+            padding: 12px 25px;
+            background: #333;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.2s;
         }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .btn-nav:hover {
+            background: #444;
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-finish {
+            background-color: #2ecc71;
+            color: #000;
+            font-weight: bold;
+            border-color: #27ae60;
+        }
+
+        /* --- ÖZEL SEÇİM ALANI (SAYFA 23 & 24) --- */
+        #choice-container {
+            display: none;
+            /* Varsayılan gizli */
+            margin-top: 20px;
+            height: 180px;
+            position: relative;
+        }
+
+        /* Dinamik Başlık Stili */
+        #choice-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            color: #e74c3c;
+            margin: 0 0 25px 0;
+            text-shadow: 0 0 15px rgba(231, 76, 60, 0.6);
+            letter-spacing: 3px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.85;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.02);
+                text-shadow: 0 0 25px rgba(231, 76, 60, 0.9);
+            }
+
+            100% {
+                opacity: 0.85;
+                transform: scale(1);
+            }
+        }
+
+        /* Zarif EVET Butonu */
+        .btn-choice-yes {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: 2px solid #a8ffc1;
+            color: #fff;
+            padding: 15px 60px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            box-shadow: 0 0 15px rgba(56, 239, 125, 0.5);
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            margin-right: 50px;
+            vertical-align: middle;
+        }
+
+        .btn-choice-yes:hover {
+            box-shadow: 0 0 40px rgba(56, 239, 125, 0.9);
+            transform: scale(1.1);
+        }
+
+        /* Hırçın HAYIR Butonu */
+        .btn-choice-no {
+            background-color: #c0392b;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease-in-out;
+            vertical-align: middle;
+        }
+
+        .teleported {
+            transform: translateY(100px);
+            /* Kaçış mesafesi */
+            background-color: #e74c3c;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
+
 <body>
+
+    <button id="mute-btn" onclick="toggleMute()">🔊</button>
 
     <div id="start-view" class="view-container active">
         <h1>Hikaye Başlıyor</h1>
-        <p>Seslerin açık olduğundan emin olun.</p>
+        <p>Sesler yükleniyor...</p>
         <button class="btn-start" onclick="startExperience()">BAŞLA ▶</button>
     </div>
 
     <div id="reader-view" class="view-container">
-        <div id="status-text" style="color:#666; margin-bottom:10px;">KAPAK</div>
+        <div id="status-text" style="color:#ddd; margin-bottom:10px; font-weight:600; text-shadow: 0 0 5px black;">KAPAK
+        </div>
         <img id="comic-image" src="" alt="Sayfa">
-        <div class="controls">
+
+        <div id="standard-controls" class="controls">
             <button id="btn-prev" class="btn-nav" onclick="changePage(-1)">← Geri</button>
             <button id="btn-next" class="btn-nav" onclick="changePage(1)">İleri →</button>
         </div>
-    </div>
 
-    <div id="video-view" class="view-container">
-        <h2>Son</h2>
-        <div class="video-wrapper">
-            <iframe id="final-video-frame" allowfullscreen></iframe>
+        <div id="choice-container">
+            <h3 id="choice-title">...</h3>
+
+            <button class="btn-choice-yes" onclick="handleYesClick()">EVET</button>
+            <button id="btn-no" class="btn-choice-no" onclick="handleNoClick()">HAYIR</button>
         </div>
-        <br>
-        <button class="btn-nav" onclick="restart()">Başa Dön</button>
     </div>
 
-    <div id="music-player-container">
-        <iframe id="bg-music-frame" allow="autoplay"></iframe>
+    <div id="end-view" class="view-container">
+        <h1>SON</h1>
+        <p style="margin-bottom: 30px; font-size: 1.2rem;">Hikayenin sonuna geldiniz.</p>
+        <button class="btn-start" onclick="restart()">BAŞA DÖN ↺</button>
     </div>
 
     <script>
-        /* --- MÜHENDİSLİK AYARLARI (CONFIG) --- */
+        /* --- CONFIGURATION --- */
         const config = {
-            totalContentPages: 25,     
-            folder: "assets/karikatur/", 
+            totalContentPages: 26, // GÜNCELLENDİ: 26 Sayfa
+            folder: "assets/karikatur/",
             ext: ".jpg",
-            finalVideoID: "M7lc1UVf-VE",
 
-            // --- MÜZİK SEGMENTLERİ (LUT - Look Up Table) ---
-            // 'startPage': Hangi sayfada bu müzik çalmaya başlasın?
-            // 'videoID': YouTube Video ID'si
-            // Sistem her zaman o anki sayfadan küçük veya eşit olan en büyük 'startPage' değerini baz alır.
             musicSegments: [
-                { startPage: 0,  videoID: "5qap5aO4i9A" }, // Kapak ve Sayfa 7'ye kadar (Varsayılan Lofi)
-                { startPage: 8,  videoID: "jfKfPfyJRdk" }, // Sayfa 8'de başlar (Lofi Girl Synthwave)
-                { startPage: 15, videoID: "4xDzrJKXOOY" }, // Sayfa 15'te başlar (Dark Ambient)
-                { startPage: 24, videoID: "5yx6BWlEVcY" }  // Sayfa 24 ve 25 (Action/Final Music)
+                { startPage: 0, file: "assets/muzik/giris.mp3" },
+                { startPage: 8, file: "assets/muzik/gerilim.mp3" },
+                { startPage: 15, file: "assets/muzik/karanlik.mp3" },
+                { startPage: 24, file: "assets/muzik/aksiyon.mp3" }
             ]
         };
-        /* -------------------------------------- */
 
-        // Durum Değişkenleri
+        // Global Değişkenler
         let pages = [];
         let currentIndex = 0;
-        let currentMusicID = ""; // Şu an çalan müziği takip etmek için
+        let currentAudioFile = "";
 
-        // Cache DOM
+        const bgAudio = new Audio();
+        bgAudio.loop = true;
+        bgAudio.volume = 0.5;
+
+        // Elementler
         const views = {
             start: document.getElementById('start-view'),
             reader: document.getElementById('reader-view'),
-            video: document.getElementById('video-view')
+            end: document.getElementById('end-view')
         };
         const elImg = document.getElementById('comic-image');
         const elStatus = document.getElementById('status-text');
-        const elMusicFrame = document.getElementById('bg-music-frame');
-        const elFinalFrame = document.getElementById('final-video-frame');
+        const muteBtn = document.getElementById('mute-btn');
+
+        const elStandardControls = document.getElementById('standard-controls');
+        const elChoiceContainer = document.getElementById('choice-container');
+        const elChoiceTitle = document.getElementById('choice-title');
+
         const btnNext = document.getElementById('btn-next');
         const btnPrev = document.getElementById('btn-prev');
+        const btnNo = document.getElementById('btn-no');
 
-        // Init
         function init() {
-            // Liste Oluşturma
             pages.push(`${config.folder}kapak${config.ext}`);
             for (let i = 1; i <= config.totalContentPages; i++) {
                 let num = i < 10 ? "0" + i : i;
@@ -151,16 +320,13 @@
             }
         }
 
-        // Başlatma
         function startExperience() {
             switchView('reader');
-            renderPage(); // Müzik kontrolü renderPage içinde yapılıyor
+            renderPage();
         }
 
-        // Sayfa Değişimi
         function changePage(dir) {
             const nextIndex = currentIndex + dir;
-
             if (nextIndex >= pages.length) {
                 finishStory();
                 return;
@@ -171,69 +337,87 @@
             renderPage();
         }
 
-        // Render (Görsel ve Müzik Kontrolü)
+        /* --- ÖZEL BUTON İŞLEVLERİ --- */
+        function handleYesClick() {
+            changePage(1);
+        }
+
+        function handleNoClick() {
+            btnNo.classList.toggle('teleported');
+        }
+
+        // --- RENDER ENGINE ---
         function renderPage() {
-            // 1. Görseli Yükle
+            // Görsel
             elImg.classList.add('loading');
             elImg.src = pages[currentIndex];
             elImg.onload = () => elImg.classList.remove('loading');
 
-            // 2. Metni Güncelle
-            elStatus.innerText = currentIndex === 0 ? "KAPAK" : `SAYFA ${currentIndex} / ${config.totalContentPages}`;
+            // Metin
+            elStatus.innerText = currentIndex === 0 ? "KAPAK" : `SAYFA ${currentIndex}`;
 
-            // 3. Butonları Güncelle
-            btnPrev.disabled = (currentIndex === 0);
-            if (currentIndex === pages.length - 1) {
-                btnNext.innerText = "BİTİR";
-                btnNext.classList.add('btn-finish');
+            // --- KRİTİK ALAN: SAYFA 23 ve 24 MANTIĞI ---
+            if (currentIndex === 23 || currentIndex === 24) {
+                elStandardControls.style.display = 'none';
+                elChoiceContainer.style.display = 'block';
+                btnNo.classList.remove('teleported');
+
+                if (currentIndex === 23) {
+                    elChoiceTitle.innerText = "HAZIR MISIN?";
+                } else if (currentIndex === 24) {
+                    elChoiceTitle.innerText = "BENİMLE EVLENİR MİSİN?";
+                }
+
             } else {
-                btnNext.innerText = "İleri →";
-                btnNext.classList.remove('btn-finish');
-            }
+                elStandardControls.style.display = 'flex';
+                elChoiceContainer.style.display = 'none';
 
-            // 4. MÜZİK KONTROLÜ (Critical Logic)
-            checkAndPlayMusic();
-
-            // 5. Yukarı Kaydır
-            window.scrollTo(0,0);
-        }
-
-        // Müzik Mantığı
-        function checkAndPlayMusic() {
-            // Algoritma: Mevcut sayfa numarasına (currentIndex) uygun segmenti bul.
-            // Segmentleri tersten veya düzden tarayarak en uygun aralığı bulabiliriz.
-            // Buradaki yöntem: musicSegments içinde 'startPage' değeri current index'ten küçük veya eşit olan EN SON segmenti bul.
-            
-            let selectedID = "";
-            
-            // Segmentleri startPage'e göre küçükten büyüğe sıralı varsayıyoruz.
-            for (let i = 0; i < config.musicSegments.length; i++) {
-                if (currentIndex >= config.musicSegments[i].startPage) {
-                    selectedID = config.musicSegments[i].videoID;
+                btnPrev.disabled = (currentIndex === 0);
+                if (currentIndex === pages.length - 1) {
+                    btnNext.innerText = "BİTİR";
+                    btnNext.classList.add('btn-finish');
+                } else {
+                    btnNext.innerText = "İleri →";
+                    btnNext.classList.remove('btn-finish');
                 }
             }
 
-            // Eğer şu an çalması gereken müzik, zaten çalan müzikten farklıysa değiştir.
-            if (selectedID !== currentMusicID) {
-                console.log(`Müzik Değişiyor: ${currentMusicID} -> ${selectedID}`);
-                currentMusicID = selectedID;
-                
-                // YouTube Embed URL (Autoplay, Loop)
-                elMusicFrame.src = `https://www.youtube.com/embed/${selectedID}?autoplay=1&loop=1&playlist=${selectedID}&controls=0&showinfo=0`;
+            updateMusic();
+            window.scrollTo(0, 0);
+        }
+
+        function updateMusic() {
+            let selectedFile = "";
+            for (let i = 0; i < config.musicSegments.length; i++) {
+                if (currentIndex >= config.musicSegments[i].startPage) {
+                    selectedFile = config.musicSegments[i].file;
+                }
+            }
+
+            if (selectedFile !== currentAudioFile) {
+                currentAudioFile = selectedFile;
+                bgAudio.src = selectedFile;
+                const playPromise = bgAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => { console.log("Audio bekliyor:", error); });
+                }
             }
         }
 
+        function toggleMute() {
+            bgAudio.muted = !bgAudio.muted;
+            muteBtn.innerText = bgAudio.muted ? "🔇" : "🔊";
+        }
+
         function finishStory() {
-            elMusicFrame.src = ""; // Müziği sustur
-            elFinalFrame.src = `https://www.youtube.com/embed/${config.finalVideoID}?autoplay=1&rel=0`;
-            switchView('video');
+            bgAudio.pause();
+            bgAudio.currentTime = 0;
+            switchView('end');
         }
 
         function restart() {
             currentIndex = 0;
-            currentMusicID = ""; // Reset
-            elFinalFrame.src = "";
-            elMusicFrame.src = "";
+            currentAudioFile = "";
             switchView('start');
         }
 
@@ -243,7 +427,7 @@
         }
 
         init();
-
     </script>
 </body>
+
 </html>
