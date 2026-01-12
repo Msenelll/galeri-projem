@@ -19,7 +19,7 @@
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
-            background-image: url('image_1.png');
+            background-image: url('image_1.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -229,7 +229,8 @@
 
     <div id="start-view" class="view-container active">
         <h1>Hikaye Başlıyor</h1>
-        <p>Sesler yükleniyor...</p>
+        <p>Sinem Kaya -> Telefon ekranınızı yatay formata geçirip kulaklığınızı
+            takabilir misiniz ?</p>
         <button class="btn-start" onclick="startExperience()">BAŞLA ▶</button>
     </div>
 
@@ -287,7 +288,7 @@
 
         const bgAudio = new Audio();
         bgAudio.loop = true;
-        bgAudio.volume = 0.5;
+        bgAudio.volume = 0.05;
 
         // Elementler
         const views = {
