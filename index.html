@@ -229,7 +229,7 @@
 
     <div id="start-view" class="view-container active">
         <h1>Hikaye Başlıyor</h1>
-        <p>Sinem Kaya -> Lütfen kulaklık takınız ve ekranı yatay forma çeviriniz...</p>
+        <p>Sesler yükleniyor...</p>
         <button class="btn-start" onclick="startExperience()">BAŞLA ▶</button>
     </div>
 
@@ -259,25 +259,23 @@
     <script>
         /* --- MÜHENDİSLİK KONFİGÜRASYONU --- */
         const config = {
-            totalContentPages: 27,
+            totalContentPages: 29, // GÜNCELLENDİ: 29 Sayfa
             folder: "assets/karikatur/",
             ext: ".jpg",
 
             musicFolder: "assets/muzik/",
 
-            // --- MÜZİK HARİTASI (ÖNEMLİ KISIM) ---
-            // Format:  Sayfa Numarası : "Dosya Adı"
-            // Sadece müziğin DEĞİŞMESİNİ istediğin sayfaları buraya yaz.
-            // Diğer sayfalarda mevcut müzik çalmaya devam eder.
+            // --- MÜZİK HARİTASI (İndeksler Kaydırıldı) ---
             musicMap: {
                 0: "1.mp3",  // Kapak Müziği
                 3: "3.mp3", // 15. Sayfada devreye girer
                 10: "10.mp3",    // 10. Sayfada devreye girer
                 16: "16.mp3",    // 16. Sayfada devreye girer
                 18: "18.mp3",    // 18. Sayfada devreye girer
-                24: "24.mp3",    // 24. Sayfada (Hazır mısın?) devreye girer
-                25: "25.mp3",    // 25. Sayfada (Hazır mısın?) devreye girer
-                26: "26.mp3",    // 26. Sayfada (Hazır mısın?) devreye girer
+                23: "23.mp3",    // 24. Sayfada (Hazır mısın?) devreye girer
+                26: "26.mp3",    // 24. Sayfada (Hazır mısın?) devreye girer
+                27: "27.mp3",    // 25. Sayfada (Hazır mısın?) devreye girer
+                28: "28.mp3",    // 26. Sayfada (Hazır mısın?) devreye girer
                 // İstersen: 25: "romantik.mp3" de ekleyebilirsin
             }
         };
@@ -345,14 +343,18 @@
 
             elStatus.innerText = currentIndex === 0 ? "KAPAK" : `SAYFA ${currentIndex}`;
 
-            // Özel Sayfa Mantığı (24 ve 25)
-            if (currentIndex === 24 || currentIndex === 25) {
+            // --- KRİTİK ALAN: SAYFA 26 ve 27 MANTIĞI (KAYDIRILDI) ---
+            // 2 Yeni sayfa eklendiği için (22'den sonra), eski 24 -> 26 ve eski 25 -> 27 oldu.
+            if (currentIndex === 26 || currentIndex === 27) {
                 elStandardControls.style.display = 'none';
                 elChoiceContainer.style.display = 'block';
                 btnNo.classList.remove('teleported');
 
-                if (currentIndex === 24) elChoiceTitle.innerText = "HAZIR MISIN?";
-                else if (currentIndex === 25) elChoiceTitle.innerText = "BENİMLE EVLENİR MİSİN?";
+                if (currentIndex === 26) {
+                    elChoiceTitle.innerText = "HAZIR MISIN?";
+                } else if (currentIndex === 27) {
+                    elChoiceTitle.innerText = "BENİMLE EVLENİR MİSİN?";
+                }
 
             } else {
                 elStandardControls.style.display = 'flex';
@@ -374,10 +376,7 @@
 
         // --- AKILLI MÜZİK MOTORU ---
         function updateMusic() {
-            // 1. Şu anki sayfa için haritada bir atama var mı kontrol et
             const assignedTrack = config.musicMap[currentIndex];
-
-            // 2. Eğer varsa ve şu an çalan müzikten farklıysa değiştir
             if (assignedTrack) {
                 const fullPath = config.musicFolder + assignedTrack;
 
@@ -394,8 +393,6 @@
                     }
                 }
             }
-            // 3. Eğer yoksa ("else" durumu), hiçbir şey yapma.
-            // Bu sayede önceki müzik çalmaya devam eder.
         }
 
         function toggleMute() {
